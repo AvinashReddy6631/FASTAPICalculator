@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced Calculator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="calculator-container">
+        <h1>🔢 FastAPI Calculator</h1>
+        <input type="text" id="expression" placeholder="Enter expression (e.g. 12 * (4 + 3))" />
+        <div class="button-group">
+            <button onclick="calculate()">Calculate</button>
+            <button onclick="getHistory()">Show History</button>
+            <button onclick="clearHistory()">Clear History</button>
+        </div>
+        <div id="result" class="result"></div>
+        <ul id="historyList" class="history-list"></ul>
+    </div>
+
+    <script>
+        async function calculate() {
+            const expression = document.getElementById("expression").value;
+            const response = await fetch("/calculate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ expression: expression })
+            });
+            const data = await response.json();
+            document.getElementById("result").innerText = "Result: " + data.result;
+        }
+
+        function getHistory() {
+            fetch("/history")
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById("historyList");
+                    list.innerHTML = "";
+                    data.history.forEach(item => {
+                        const li = document.createElement("li");
+                        li.innerText = item;
+                        list.appendChild(li);
+                    });
+                });
+        }
+
+        function clearHistory() {
+            fetch("/clear", { method: "POST" })
+                .then(() => {
+                    document.getElementById("historyList").innerHTML = "";
+                    document.getElementById("result").innerText = "";
+                });
+        }
+    </script>
+</body>
+</html>
